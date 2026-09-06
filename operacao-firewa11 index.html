@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⏱️ Operação Firewall - Edição Relâmpago</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: #080d13;
+            color: #e8f1f8;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game {
+            width: 100%;
+            max-width: 850px;
+            background: #101923;
+            border: 1px solid #243646;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            text-align: center;
+            color: #00ff9d;
+            margin-bottom: 5px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #9fb1bf;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .header-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .header-stats .info {
+            color: #9fb1bf;
+            font-size: 14px;
+        }
+
+        .header-stats .info span {
+            color: #00ff9d;
+            font-weight: bold;
+        }
+
+        .timer-wrapper {
+            width: 100%;
+            height: 12px;
+            background: #1a2a36;
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .timer-bar {
+            height: 100%;
+            width: 100%;
+            background: #00ff9d;
+            transition: width 0.3s linear;
+            border-radius: 20px;
+        }
+
+        .timer-bar.danger {
+            background: #ff4444;
+            animation: pulse-timer 0.5s infinite;
+        }
+
+        @keyframes pulse-timer {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .timer-text {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #00ff9d;
+        }
+
+        .timer-text.danger {
+            color: #ff4444;
+        }
+
+        .scenario {
+            background: #0b121a;
+            border: 1px solid #263746;
+            padding: 22px;
+            border-radius: 14px;
+            margin-bottom: 20px;
+        }
+
+        .scenario h2 {
+            color: #00d9ff;
+            margin-bottom: 12px;
+            font-size: 20px;
+        }
+
+        .scenario .description {
+            color: #c8d4dc;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .clue {
+            background: #17232e;
+            border-left: 4px solid #00ff9d;
+            padding: 12px 15px;
+            margin: 8px 0;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #b0c4d0;
+        }
+
+        .options {
+            display: grid;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .options button {
+            padding: 15px;
+            border: 2px solid #1a2a36;
+            border-radius: 10px;
+            background: #0f1a24;
+            color: #e8f1f8;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.2s;
+            text-align: left;
+        }
+
+        .options button:hover:not(:disabled) {
+            background: #1a2f40;
+            border-color: #00ff9d;
+            transform: translateY(-2px);
+        }
+
+        .options button:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        .options button.correct {
+            background: #11633f !important;
+            border-color: #00ff9d !important;
+        }
+
+        .options button.wrong {
+            background: #7a2630 !important;
+            border-color: #ff4444 !important;
+        }
+
+        .options button.reveal-correct {
+            background: #11633f !important;
+            border-color: #00ff9d !important;
+            opacity: 0.6;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 10px;
+            display: none;
+            background: #0f1a24;
+            border-left: 4px solid #00ff9d;
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.correct-feedback {
+            border-color: #00ff9d;
+        }
+
+        .feedback.wrong-feedback {
+            border-color: #ff4444;
+        }
+
+        .feedback.timeout-feedback {
+            border-color: #ffaa00;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 20px;
+            margin-top: 20px;
+            color: #00ff9d;
+        }
+
+        .next {
+            display: none;
+            margin: 20px auto 0;
+            background: #00a875;
+            max-width: 250px;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+            width: 100%;
+        }
+
+        .next:hover {
+            background: #00c98d;
+            transform: scale(1.02);
+        }
+
+        .final {
+            display: none;
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .final h2 {
+            color: #00ff9d;
+            margin-bottom: 20px;
+            font-size: 30px;
+        }
+
+        .final p {
+            line-height: 1.7;
+            color: #c8d4dc;
+            margin-bottom: 15px;
+        }
+
+        .restart {
+            background: #006fbd;
+            margin-top: 15px;
+            padding: 14px 30px;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .restart:hover {
+            background: #0088e6;
+            transform: scale(1.02);
+        }
+
+        .badge {
+            display: inline-block;
+            background: #172b39;
+            padding: 10px 25px;
+            border-radius: 20px;
+            margin: 10px 0 20px;
+            color: #00d9ff;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .question-counter {
+            color: #9fb1bf;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        .question-counter span {
+            color: #00ff9d;
+            font-weight: bold;
+        }
+
+        @media (max-width: 600px) {
+            .game {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 22px;
+            }
+
+            .options button {
+                font-size: 14px;
+                padding: 12px;
+            }
+
+            .header-stats {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <div id="gameScreen">
+
+        <h1>🛡️ OPERAÇÃO FIREWALL</h1>
+        <p class="subtitle">⚡ Edição Relâmpago - Responda antes do tempo acabar!</p>
+
+        <div class="header-stats">
+            <div class="info">🎯 Pontuação: <span id="score">0</span></div>
+            <div class="info">📝 Pergunta: <span id="questionCounter">1</span>/4</div>
+        </div>
+
+        <div class="timer-wrapper">
+            <div class="timer-bar" id="timerBar"></div>
+        </div>
+        <div class="timer-text" id="timerText">⏱️ 20s</div>
+
+        <div class="scenario">
+            <h2 id="title"></h2>
+            <p class="description" id="description"></p>
+            <div id="clues"></div>
+            <h3 style="margin-top:20px; color: #00d9ff; font-size: 16px;">
+                🔎 Qual foi o principal problema?
+            </h3>
+            <div class="options" id="options"></div>
+            <div class="feedback" id="feedback"></div>
+            <button class="next" id="nextButton" onclick="nextQuestion()">
+                Próxima investigação →
+            </button>
+        </div>
+
+        <div class="question-counter">
+            ⏳ Tempo restante: <span id="timeLeftDisplay">20</span>s
+        </div>
+
+    </div>
+
+    <div class="final" id="finalScreen">
+        <h2>🎉 Investigação concluída!</h2>
+        <p id="finalMessage"></p>
+        <div class="badge" id="badge"></div>
+        <p>
+            Nesta simulação você aprendeu a reconhecer situações
+            relacionadas a phishing, senhas fracas, engenharia social
+            e outras ameaças digitais.
+        </p>
+        <p>
+            Lembre-se: segurança digital começa com atenção,
+            senhas fortes, autenticação em dois fatores e cuidado
+            com links e mensagens suspeitas.
+        </p>
+        <button class="restart" onclick="restartGame()">
+            🔄 Jogar novamente
+        </button>
+    </div>
+
+</div>
+
+<script>
+    // ============================================
+    // BANCO DE PERGUNTAS (10 perguntas)
+    // ============================================
+    const questionBank = [
+        {
+            title: "📧 Caso 1 — O e-mail suspeito",
+            description: "Uma pessoa recebe um e-mail dizendo que sua conta será bloqueada caso ela não confirme seus dados imediatamente.",
+            clues: [
+                "⚠️ O e-mail cria um senso de urgência.",
+                "🔗 Existe um link para 'confirmar a conta'.",
+                "📨 O endereço do remetente parece estranho."
+            ],
+            options: [
+                "Phishing",
+                "Problema no computador",
+                "Atualização normal do sistema",
+                "Falha no monitor"
+            ],
+            correct: 0,
+            explanation: "Correto! A situação apresenta características típicas de phishing: mensagem suspeita, urgência e tentativa de induzir a pessoa a acessar um link."
+        },
+        {
+            title: "🔑 Caso 2 — A senha previsível",
+            description: "Uma pessoa utiliza a mesma senha simples em várias contas porque considera mais fácil memorizar.",
+            clues: [
+                "🔓 A senha é curta e previsível.",
+                "♻️ A mesma senha é utilizada em vários serviços.",
+                "📝 A senha contém informações fáceis de descobrir."
+            ],
+            options: [
+                "Senha fraca e reutilizada",
+                "Phishing",
+                "Problema de internet",
+                "Vírus no teclado"
+            ],
+            correct: 0,
+            explanation: "Isso mesmo! Usar senhas fracas ou reutilizadas aumenta o risco de comprometimento de várias contas."
+        },
+        {
+            title: "🎭 Caso 3 — A falsa identidade",
+            description: "Uma pessoa recebe uma mensagem de alguém que afirma ser responsável pelo suporte técnico e pede informações da conta.",
+            clues: [
+                "👤 A pessoa se apresenta como funcionário.",
+                "📱 O contato aconteceu por uma mensagem inesperada.",
+                "🔐 São solicitadas informações que deveriam ser privadas."
+            ],
+            options: [
+                "Engenharia social",
+                "Falha de hardware",
+                "Problema no Wi-Fi",
+                "Atualização automática"
+            ],
+            correct: 0,
+            explanation: "Correto! Engenharia social utiliza manipulação e confiança para tentar convencer alguém a revelar informações."
+        },
+        {
+            title: "🛡️ Caso 4 — Como impedir?",
+            description: "Depois de identificar o problema, você precisa escolher a melhor medida preventiva.",
+            clues: [
+                "🔐 Utilizar senhas fortes e diferentes.",
+                "📲 Ativar autenticação em dois fatores.",
+                "🔎 Verificar remetentes e links antes de acessá-los."
+            ],
+            options: [
+                "Ignorar mensagens suspeitas e usar boas práticas",
+                "Compartilhar a senha com colegas",
+                "Usar a mesma senha em todos os sites",
+                "Clicar rapidamente para verificar o link"
+            ],
+            correct: 0,
+            explanation: "Excelente! Essas práticas reduzem bastante os riscos de golpes e comprometimento de contas."
+        },
+        {
+            title: "📱 Caso 5 — O SMS falso",
+            description: "Uma pessoa recebe um SMS informando que seu cartão de crédito foi bloqueado e pedindo que ela ligue para um número urgente.",
+            clues: [
+                "📲 Mensagem de texto inesperada.",
+                "⚠️ Cria senso de urgência financeira.",
+                "📞 Número de telefone desconhecido."
+            ],
+            options: [
+                "Smishing (Phishing por SMS)",
+                "Problema no banco",
+                "Atualização de sistema",
+                "Falha no cartão"
+            ],
+            correct: 0,
+            explanation: "Correto! Smishing é o phishing realizado por SMS, uma técnica comum para enganar vítimas."
+        },
+        {
+            title: "💻 Caso 6 — O programa gratuito",
+            description: "Uma pessoa baixa um programa 'grátis' de um site não oficial e começa a ver anúncios estranhos no computador.",
+            clues: [
+                "📥 Download de fonte não confiável.",
+                "🔄 O programa promete funcionalidades extras.",
+                "📢 Aparecem anúncios indesejados."
+            ],
+            options: [
+                "Malware/adware",
+                "Atualização de segurança",
+                "Problema de hardware",
+                "Vírus de monitor"
+            ],
+            correct: 0,
+            explanation: "Isso mesmo! Programas baixados de fontes não oficiais podem conter malware ou adware que comprometem a segurança."
+        },
+        {
+            title: "🔗 Caso 7 — O link encurtado",
+            description: "Uma pessoa recebe um link encurtado por mensagem, com a promessa de um prêmio.",
+            clues: [
+                "🔗 Link encurtado (bit.ly, tinyurl).",
+                "🎁 Promessa de prêmio ou vantagem.",
+                "📨 Enviado por um contato desconhecido."
+            ],
+            options: [
+                "Phishing com link malicioso",
+                "Promoção legítima",
+                "Atualização do sistema",
+                "Convite para evento"
+            ],
+            correct: 0,
+            explanation: "Links encurtados escondem o destino real. Sempre verifique antes de clicar!"
+        },
+        {
+            title: "📂 Caso 8 — O anexo suspeito",
+            description: "Um e-mail de um remetente desconhecido chega com um anexo em formato .exe.",
+            clues: [
+                "📎 Anexo com extensão executável (.exe).",
+                "📨 Remetente não identificado.",
+                "🔍 Não há descrição clara do conteúdo."
+            ],
+            options: [
+                "Possível vírus ou malware",
+                "Arquivo de trabalho legítimo",
+                "Atualização de software",
+                "Documento de texto"
+            ],
+            correct: 0,
+            explanation: "Nunca abra anexos executáveis de remetentes desconhecidos. Podem conter malware!"
+        },
+        {
+            title: "🎯 Caso 9 — A oferta irresistível",
+            description: "Um anúncio promete um celular novo por um preço muito abaixo do mercado, mas pede dados pessoais para 'confirmação'.",
+            clues: [
+                "💰 Preço muito abaixo do mercado.",
+                "📝 Pedem dados pessoais antes da compra.",
+                "🌐 Site com URL estranha."
+            ],
+            options: [
+                "Golpe de phishing para roubo de dados",
+                "Promoção verdadeira",
+                "Liquidação de estoque",
+                "Parceria com fabricante"
+            ],
+            correct: 0,
+            explanation: "Ofertas boas demais para ser verdade geralmente são golpes para roubar dados pessoais e financeiros."
+        },
+        {
+            title: "📞 Caso 10 — A ligação suspeita",
+            description: "Uma pessoa recebe uma ligação de alguém que se identifica como do banco, pedindo confirmação de dados.",
+            clues: [
+                "📞 Ligação não solicitada.",
+                "🏦 Pessoa se identifica como funcionário.",
+                "🔐 Pedem senha ou dados pessoais."
+            ],
+            options: [
+                "Golpe de vishing (phishing por voz)",
+                "Ligação legítima do banco",
+                "Pesquisa de satisfação",
+                "Problema técnico"
+            ],
+            correct: 0,
+            explanation: "Vishing é phishing por voz. Bancos nunca ligam pedindo senhas ou dados pessoais!"
+        }
+    ];
+
+    // ============================================
+    // VARIÁVEIS DO JOGO
+    // ============================================
+    let currentQuestions = [];
+    let currentIndex = 0;
+    let score = 0;
+    let answered = false;
+    let timer = null;
+    let timeLeft = 20;
+    const TOTAL_QUESTIONS = 4;
+    const TIME_LIMIT = 20;
+
+    // ============================================
+    // FUNÇÕES PRINCIPAIS
+    // ============================================
+
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    function selectRandomQuestions() {
+        // Embaralha o banco e pega 4 perguntas
+        const shuffled = shuffleArray([...questionBank]);
+        return shuffled.slice(0, TOTAL_QUESTIONS);
+    }
+
+    function shuffleOptions(question) {
+        // Cria cópia das opções com índices originais
+        const optionsWithIndex = question.options.map((text, index) => ({
+            text,
+            isCorrect: index === question.correct
+        }));
+
+        // Embaralha
+        const shuffled = shuffleArray([...optionsWithIndex]);
+
+        // Atualiza as opções e o índice correto
+        question.options = shuffled.map(item => item.text);
+        question.correct = shuffled.findIndex(item => item.isCorrect);
+
+        return question;
+    }
+
+    function loadGame() {
+        // Seleciona 4 perguntas aleatórias
+        currentQuestions = selectRandomQuestions();
+
+        // Embaralha as opções de cada pergunta
+        currentQuestions.forEach(q => shuffleOptions(q));
+
+        currentIndex = 0;
+        score = 0;
+        document.getElementById("score").textContent = "0";
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        answered = false;
+        clearInterval(timer);
+        timeLeft = TIME_LIMIT;
+
+        const q = currentQuestions[currentIndex];
+
+        // Atualiza título e descrição
+        document.getElementById("title").textContent = q.title;
+        document.getElementById("description").textContent = q.description;
+
+        // Atualiza dicas
+        const clues = document.getElementById("clues");
+        clues.innerHTML = "";
+        q.clues.forEach(clue => {
+            const div = document.createElement("div");
+            div.className = "clue";
+            div.textContent = clue;
+            clues.appendChild(div);
+        });
+
+        // Atualiza opções
+        const options = document.getElementById("options");
+        options.innerHTML = "";
+        q.options.forEach((option, index) => {
+            const button = document.createElement("button");
+            button.textContent = option;
+            button.dataset.index = index;
+            button.onclick = () => handleAnswer(index);
+            options.appendChild(button);
+        });
+
+        // Atualiza contador
+        document.getElementById("questionCounter").textContent = currentIndex + 1;
+
+        // Esconde feedback
+        const feedback = document.getElementById("feedback");
+        feedback.classList.remove("show");
+        feedback.className = "feedback";
+
+        // Esconde botão próximo
+        document.getElementById("nextButton").style.display = "none";
+
+        // Atualiza barra de progresso
+        updateTimerDisplay();
+
+        // Inicia o timer
+        startTimer();
+    }
+
+    function startTimer() {
+        clearInterval(timer);
+        timeLeft = TIME_LIMIT;
+        updateTimerDisplay();
+
+        timer = setInterval(() => {
+            timeLeft--;
+            updateTimerDisplay();
+
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                handleTimeout();
+            }
+        }, 1000);
+    }
+
+    function updateTimerDisplay() {
+        const bar = document.getElementById("timerBar");
+        const text = document.getElementById("timerText");
+        const display = document.getElementById("timeLeftDisplay");
+
+        const percentage = (timeLeft / TIME_LIMIT) * 100;
+        bar.style.width = percentage + "%";
+        display.textContent = timeLeft;
+        text.textContent = `⏱️ ${timeLeft}s`;
+
+        // Muda cor quando está acabando
+        if (timeLeft <= 5) {
+            bar.classList.add("danger");
+            text.classList.add("danger");
+        } else {
+            bar.classList.remove("danger");
+            text.classList.remove("danger");
+        }
+    }
+
+    function handleTimeout() {
+        if (answered) return;
+        answered = true;
+
+        const q = currentQuestions[currentIndex];
+        const buttons = document.querySelectorAll("#options button");
+        buttons.forEach(b => b.disabled = true);
+
+        // Revela resposta correta
+        buttons.forEach((btn, idx) => {
+            if (idx === q.correct) {
+                btn.classList.add("reveal-correct");
+            }
+        });
+
+        const feedback = document.getElementById("feedback");
+        feedback.className = "feedback show timeout-feedback";
+        feedback.innerHTML = `
+            ⏰ <strong>Tempo esgotado!</strong><br><br>
+            A resposta correta era: <strong>${q.options[q.correct]}</strong><br><br>
+            ${q.explanation}
+        `;
+
+        document.getElementById("nextButton").style.display = "block";
+    }
+
+    function handleAnswer(index) {
+        if (answered) return;
+        answered = true;
+        clearInterval(timer);
+
+        const q = currentQuestions[currentIndex];
+        const buttons = document.querySelectorAll("#options button");
+        buttons.forEach(b => b.disabled = true);
+
+        const feedback = document.getElementById("feedback");
+
+        if (index === q.correct) {
+            score += 10;
+            document.getElementById("score").textContent = score;
+            buttons[index].classList.add("correct");
+            feedback.className = "feedback show correct-feedback";
+            feedback.innerHTML = `
+                ✅ <strong>Resposta correta!</strong><br><br>
+                ${q.explanation}
+            `;
+        } else {
+            buttons[index].classList.add("wrong");
+            buttons[q.correct].classList.add("correct");
+            feedback.className = "feedback show wrong-feedback";
+            feedback.innerHTML = `
+                ❌ <strong>Não foi dessa vez.</strong><br><br>
+                A resposta correta era: <strong>${q.options[q.correct]}</strong><br><br>
+                ${q.explanation}
+            `;
+        }
+
+        document.getElementById("nextButton").style.display = "block";
+    }
+
+    function nextQuestion() {
+        currentIndex++;
+        if (currentIndex < currentQuestions.length) {
+            loadQuestion();
+        } else {
+            finishGame();
+        }
+    }
+
+    function finishGame() {
+        clearInterval(timer);
+        document.getElementById("gameScreen").style.display = "none";
+        document.getElementById("finalScreen").style.display = "block";
+
+        const maxScore = TOTAL_QUESTIONS * 10;
+        let message = "";
+        let badge = "";
+
+        if (score === maxScore) {
+            message = `🏆 Excelente! Você identificou todos os ${TOTAL_QUESTIONS} problemas de segurança!`;
+            badge = "ESPECIALISTA EM SEGURANÇA";
+        } else if (score >= maxScore * 0.7) {
+            message = `👍 Muito bem! Você identificou a maioria das ameaças.`;
+            badge = "INVESTIGADOR DIGITAL";
+        } else if (score >= maxScore * 0.4) {
+            message = `📚 Bom trabalho! Continue praticando para melhorar.`;
+            badge = "APRENDIZ DE SEGURANÇA";
+        } else {
+            message = `💡 Você concluiu a investigação. Que tal jogar novamente para melhorar?`;
+            badge = "RECRUTA EM TREINAMENTO";
+        }
+
+        document.getElementById("finalMessage").textContent =
+            `${message} Sua pontuação foi ${score}/${maxScore}.`;
+
+        document.getElementById("badge").textContent = badge;
+    }
+
+    function restartGame() {
+        document.getElementById("gameScreen").style.display = "block";
+        document.getElementById("finalScreen").style.display = "none";
+        loadGame();
+    }
+
+    // ============================================
+    // INICIALIZAÇÃO
+    // ============================================
+    loadGame();
+</script>
+
+</body>
+</html>
